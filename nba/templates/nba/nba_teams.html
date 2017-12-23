@@ -1,5 +1,5 @@
 <ul>
-{% for team in nba_teams %}
-    <h2>{{ team }}</h2>
+{% for team in teams %}
+    <h2><a href="/nba/{{team.tri_code}}/">{{ team.team_name }}</a></h2>
 {% endfor %}
 </ul>

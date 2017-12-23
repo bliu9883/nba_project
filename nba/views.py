@@ -1,23 +1,43 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import loader
+from .models import Team, Player
 import requests
 
 # Create your views here.
 def get_all_nba_teams():
-	nba_teams = []
-	r = requests.get("http://data.nba.net/data/1h/prod/2017/teams_config.json")
-	r = r.json()['teams']['config']
+	r = requests.get("http://data.nba.net/data/10s/prod/v1/2017/teams.json")
+	r = r.json()['league']['standard']
 	for i in r:
-		if i['web']['homepage'] != "":
-			nba_teams.append(i['ttsName'])
-	return nba_teams
+		if i['isNBAFranchise']:
+			# nba_teams.append({'teamId': i['teamId'], 'fullName': i['fullName'], 'tricode': i['tricode']})		
+			team = Team(id=i['teamId'], team_name=i['fullName'], tri_code=i['tricode'])
+			team.save()
 
 # start page
 def nba_teams(request):		
-	nba_teams = get_all_nba_teams()
+	get_all_nba_teams()
+	teams = Team.objects.order_by('team_name')
 	template = loader.get_template('nba/nba_teams.html')
 	context = {
-		'nba_teams': nba_teams,
+		'teams': teams,
+	}
+	return HttpResponse(template.render(context, request))
+
+def get_players_on_team(teamId):
+	r = requests.get("http://data.nba.net/data/10s/prod/v1/2017/teams/%s/roster.json" %teamId)
+	r = r.json()['league']['standard']['players']
+	for i in r:
+		player = Player(id=i['personId'], team=Team.objects.get(id=teamId))
+		player.save()
+	
+# get team info using tricode as link
+def team_info(request, tri_code):
+	team = Team.objects.get(tri_code=tri_code)
+	get_players_on_team(team.id)
+	players = team.player_set.all()
+	template = loader.get_template('nba/team_roster.html')
+	context = {
+		'players': players,
 	}
 	return HttpResponse(template.render(context, request))
