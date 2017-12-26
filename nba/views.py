@@ -25,17 +25,21 @@ def nba_teams(request):
 	return HttpResponse(template.render(context, request))
 
 def get_players_on_team(teamId):
-	r = requests.get("http://data.nba.net/data/10s/prod/v1/2017/teams/%s/roster.json" %teamId)
-	r = r.json()['league']['standard']['players']
+	r = requests.get("http://data.nba.net/data/10s/prod/v1/2017/players.json")
+	r = r.json()['league']['standard']
 	for i in r:
-		player = Player(id=i['personId'], team=Team.objects.get(id=teamId))
-		player.save()
+		if str(teamId) == i['teamId']:
+			player = Player(id=i['personId'], 
+							team=Team.objects.get(id=teamId),
+							first_name=i['firstName'],
+							last_name=i['lastName'])
+			player.save()
 	
 # get team info using tricode as link
 def team_info(request, tri_code):
 	team = Team.objects.get(tri_code=tri_code)
 	get_players_on_team(team.id)
-	players = team.player_set.all()
+	players = team.player_set.all().order_by('last_name')
 	template = loader.get_template('nba/team_roster.html')
 	context = {
 		'players': players,
