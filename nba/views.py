@@ -14,10 +14,20 @@ def get_all_nba_teams():
 			team = Team(id=i['teamId'], team_name=i['fullName'], tri_code=i['tricode'])
 			team.save()
 
+def get_team_colors():
+	r = requests.get("http://data.nba.net/data/1h/prod/2017/teams_config.json")
+	r=r.json()['teams']['config']
+	for i in r:
+		if Team.objects.filter(id=i['teamId']).exists():
+			team = Team.objects.get(id=i['teamId'])
+			team.color = i['primaryColor']
+			team.save()
+	
 # start page
 def nba_teams(request):		
 	get_all_nba_teams()
 	teams = Team.objects.order_by('team_name')
+	get_team_colors()
 	template = loader.get_template('nba/nba_teams.html')
 	context = {
 		'teams': teams,

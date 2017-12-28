@@ -27,6 +27,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+STATICFILES_DIRS = [
+	"/Desktop/nba_project/nba/static",
+]
 
 # Application definition
 

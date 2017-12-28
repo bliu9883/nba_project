@@ -4,6 +4,7 @@ from django.db import models
 class Team(models.Model):
 	team_name = models.CharField(max_length=200)
 	tri_code = models.CharField(max_length=200)
+	color = models.CharField(max_length=20, default="")
 
 	def __str__(self):
 		return self.team_name
