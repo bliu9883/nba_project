@@ -1,5 +1,11 @@
-<ul>
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'nba/team_roster.css' %}" />
+
+<h1> {{ team.team_name }}</h1>
+
 {% for player in players %}
-    <h2>{{ player.first_name }} {{ player.last_name }}</h2>
+	<div>
+		<h2>{{ player.first_name }} {{ player.last_name }}</h2>
+	</div>
 {% endfor %}
-</ul>
