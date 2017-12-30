@@ -11,15 +11,23 @@ def get_all_nba_teams():
 	for i in r:
 		if i['isNBAFranchise']:
 			# nba_teams.append({'teamId': i['teamId'], 'fullName': i['fullName'], 'tricode': i['tricode']})		
-			if not Team.objects.get(id=i['teamId']).was_updated_recently():
+			if Team.objects.filter(id=i['teamId']).exists():
+				if not Team.objects.get(id=i['teamId']).was_updated_recently():
+					team = Team(id=i['teamId'], 
+								team_name=i['fullName'], 
+								tri_code=i['tricode'],
+								conference=i['confName'],
+								division=i['divName'])
+					team.save()
+				else:
+					break;
+			else:
 				team = Team(id=i['teamId'], 
 							team_name=i['fullName'], 
 							tri_code=i['tricode'],
 							conference=i['confName'],
 							division=i['divName'])
 				team.save()
-			else:
-				break;
 
 def get_team_colors():
 	r = requests.get("http://data.nba.net/data/1h/prod/2017/teams_config.json")
@@ -32,7 +40,10 @@ def get_team_colors():
 				team.save()
 			else:
 				break;
-	
+		else:
+			team = Team.objects.get(id=i['teamId'])
+			team.color = i['primaryColor']
+			team.save()
 # start page
 def nba_teams(request):		
 	get_all_nba_teams()

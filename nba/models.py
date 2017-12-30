@@ -37,7 +37,7 @@ class PlayerStats(models.Model):
 	updated_at = models.DateTimeField(auto_now=True)
 	
 	def __str__(self):
-		return self.player
+		return self.player.first_name + " " + self.player.last_name
 		
 	def was_updated_recently(self):
 		return self.updated_at >= timezone.now() - datetime.timedelta(days=1)
