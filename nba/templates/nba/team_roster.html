@@ -4,8 +4,19 @@
 
 <h1> {{ team.team_name }}</h1>
 
+<table>
+	<tr>
+		<th></th>
+		<th> Points </th>
+		<th> Rebounds </th>
+		<th> Assists </th>
+	</tr>
 {% for player in players %}
-	<div>
-		<h2>{{ player.first_name }} {{ player.last_name }}</h2>
-	</div>
+	<tr>
+		<td><a href="{% url 'nba:player_info' tri_code=player.team.tri_code playerId=player.id %}">{{ player.first_name }} {{ player.last_name }}</a></td>
+		<td>{{ player.points }}</td>
+		<td>{{ player.rebounds }}</td>
+		<td>{{ player.assists }}</td>
+	</tr>
 {% endfor %}
+</table>
