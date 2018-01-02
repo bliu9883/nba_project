@@ -4,6 +4,7 @@
 
 <ul>
 {% for team in teams %}
+<img src="{{team.logo.url}}" style="width:50; height:50;">
 <div onmouseover="this.style='background-color:{{ team.color }};';" onmouseout="this.style='background-color:#313842';">
 	<a href="{% url 'nba:team_info' team.tri_code %}"
 		style="text-decoration:none; color:white">

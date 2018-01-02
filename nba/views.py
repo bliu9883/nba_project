@@ -17,7 +17,10 @@ def get_all_nba_teams():
 								team_name=i['fullName'], 
 								tri_code=i['tricode'],
 								conference=i['confName'],
-								division=i['divName'])
+								division=i['divName'],
+								url="http://stats.nba.com/media/img/teams/logos/" + i['tricode'] + "_logo.svg",
+								)
+					team.cache()
 					team.save()
 				else:
 					break;
@@ -26,7 +29,10 @@ def get_all_nba_teams():
 							team_name=i['fullName'], 
 							tri_code=i['tricode'],
 							conference=i['confName'],
-							division=i['divName'])
+							division=i['divName'],
+							url="http://stats.nba.com/media/img/teams/logos/" + i['tricode'] + "_logo.svg",
+							)
+				team.cache()
 				team.save()
 
 def get_team_colors():
@@ -35,7 +41,7 @@ def get_team_colors():
 	for i in r:
 		if Team.objects.filter(id=i['teamId']).exists():
 			team = Team.objects.get(id=i['teamId'])
-			if team.color == None:
+			if team.color == "":
 				team.color = i['primaryColor']
 				team.save()
 
