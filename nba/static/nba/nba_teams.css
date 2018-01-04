@@ -2,7 +2,7 @@ body {
 	background-color: #0253a4;
 }
 
-div{
+.team_info{
 	border: 5px solid #cc2b31;
 	background-color: #313842;
 	width: 80%;
@@ -10,6 +10,9 @@ div{
 }
 
 h2{
-	padding: 50px;
-	margin: 5px;
+	padding: 10px;
+}
+
+img{
+	
 }

@@ -15,6 +15,8 @@ class Team(models.Model):
 	updated_at = models.DateTimeField(auto_now=True)
 	url = models.CharField(max_length=500)
 	logo = models.ImageField(upload_to="static/logos", null=True)
+	wins = models.CharField(max_length=3, default="")
+	losses = models.CharField(max_length=3, default="")
 
 	def __str__(self):
 		return self.team_name
@@ -35,10 +37,19 @@ class Player(models.Model):
 	first_name = models.CharField(max_length=200)
 	last_name = models.CharField(max_length=200)
 	team = models.ForeignKey(Team, on_delete=models.CASCADE)
+	
+	jersey = models.CharField(max_length=3, default="")
+	height = models.CharField(max_length=5, default="")
+	weight = models.CharField(max_length=6, default="")
+	dob = models.CharField(max_length=200, default="")
+	position = models.CharField(max_length=3, default="")
+	college = models.CharField(max_length=200, default="")
+	draft = models.CharField(max_length=200, default="")
 
 	points = models.CharField(max_length=10)
 	rebounds = models.CharField(max_length=10)
 	assists = models.CharField(max_length=10)
+	
 	updated_at = models.DateTimeField(auto_now=True)
 
 	def __str__(self):

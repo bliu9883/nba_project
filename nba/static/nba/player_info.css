@@ -1,0 +1,11 @@
+img{
+	width: 250px;
+	height: 250px;
+	display: inline-block;
+}
+
+#basic_info{
+	vertical-align: top;
+	display: inline-block;
+	border: 2px solid black;
+}

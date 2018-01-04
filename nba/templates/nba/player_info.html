@@ -1,1 +1,10 @@
-<h1> {{player.first_name}}<h1>
+{% load static %}
+
+<link rel="stylesheet" type="text/css" href="{% static 'nba/player_info.css' %}" />
+
+<img src="{{player.team.logo.url}}">
+
+<div id="basic_info">
+	<h1> {{player.first_name}} {{player.last_name}}</h1>
+	<p> <a href="{% url 'nba:team_info' player.team.tri_code %}">{{player.team.team_name}}</a>, #{{player.jersey}}, {{player.position}} </p>
+</div>

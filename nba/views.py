@@ -2,7 +2,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import loader
 from .models import Team, Player
-import requests
+import requests, datetime
 
 # Create your views here.
 def get_all_nba_teams():
@@ -45,17 +45,36 @@ def get_team_colors():
 				team.color = i['primaryColor']
 				team.save()
 
+def get_current_standings():
+	now = datetime.datetime.now()
+	date = str(now.year) + '%02d'%now.month + '%02d'%now.day
+	r = requests.get("http://data.nba.net/data/10s/prod/v1/" + date +"/standings_all.json")
+	r = r.json()['league']['standard']['teams']
+	for i in r:
+		team = Team.objects.get(id=i['teamId'])
+		team.wins = i['win']
+		team.losses = i['loss']
+		team.save()
+
 # start page
 def nba_teams(request):		
 	get_all_nba_teams()
 	teams = Team.objects.order_by('team_name')
 	get_team_colors()
+	get_current_standings()
 	template = loader.get_template('nba/nba_teams.html')
 	context = {
 		'teams': teams,
 	}
 	return HttpResponse(template.render(context, request))
 
+def get_player_stats(player):
+	r = requests.get("http://data.nba.net/data/10s/prod/v1/2017/players/" + str(player.id) + "_profile.json")
+	r = r.json()['league']['standard']['stats']['latest']
+	player.points = r['ppg'] if r['ppg'] != '-1' else 'N/A'
+	player.rebounds = r['rpg'] if r['rpg'] != '-1' else 'N/A'
+	player.assists = r['apg'] if r['apg'] != '-1' else 'N/A'
+	
 def get_players_on_team(teamId):
 	r = requests.get("http://data.nba.net/data/10s/prod/v1/2017/players.json")
 	r = r.json()['league']['standard']
@@ -67,7 +86,16 @@ def get_players_on_team(teamId):
 					player = Player(id=i['personId'], 
 									team=team,
 									first_name=i['firstName'],
-									last_name=i['lastName'])
+									last_name=i['lastName'],
+									jersey=i['jersey'],
+									height=i['heightFeet']+ "\'" + i['heightInches'] + '\"',
+									weight=i['weightPounds'],
+									dob=i['dateOfBirthUTC'],
+									position=i['pos'],
+									college=i['collegeName'],
+									draft=i['draft']['seasonYear'] + " Round: " +i['draft']['roundNum'] + " Pick: " + i['draft']['pickNum'],
+									)
+					get_player_stats(player)
 					player.save()
 				else:
 					break;
@@ -75,27 +103,22 @@ def get_players_on_team(teamId):
 				player = Player(id=i['personId'], 
 								team=Team.objects.get(id=teamId),
 								first_name=i['firstName'],
-								last_name=i['lastName'])
+								last_name=i['lastName'],
+								jersey=i['jersey'],
+									height=i['heightFeet']+ "\'" + i['heightInches'] + '\"',
+									weight=i['weightPounds'] + "lbs",
+									dob=i['dateOfBirthUTC'],
+									position=i['pos'],
+									college=i['collegeName'],
+									draft=i['draft']['seasonYear'] + " Round: " +i['draft']['roundNum'] + " Pick: " + i['draft']['pickNum'],)
+				get_player_stats(player)
 				player.save()
 				
-def get_player_current_stats(teamId):
-	team = Team.objects.get(id=teamId)
-	players = team.player_set.all()
-	for i in players:
-		if Player.objects.filter(id=i.id).exists():
-			player = Player.objects.get(id=i.id)
-			r = requests.get("http://data.nba.net/data/10s/prod/v1/2017/players/" + str(i.id) + "_profile.json")
-			r = r.json()['league']['standard']['stats']['latest']
-			player.points = r['ppg']
-			player.rebounds= r['rpg']
-			player.assists = r['apg']
-			player.save()
 
 # get team info using tricode as link
 def team_info(request, tri_code):
 	team = Team.objects.get(tri_code=tri_code)
 	get_players_on_team(team.id)
-	get_player_current_stats(team.id)
 	players = team.player_set.all().order_by('last_name')
 	template = loader.get_template('nba/team_roster.html')
 	context = {
