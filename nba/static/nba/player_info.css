@@ -1,11 +1,71 @@
-img{
-	width: 250px;
-	height: 250px;
+#pic{
+	margin: 40 10 0 50;
 	display: inline-block;
+	width: 300;
+	margin: 0 auto;
 }
+
+
+#player_pic{
+	width:280; 
+	height:190;
+	border-radius: 25%;
+}
+
+#player_card{
+	border: 2px solid black;
+	display: inline-block;
+	vertical-align: top;
+	margin: 0 0 0 40;}
 
 #basic_info{
 	vertical-align: top;
 	display: inline-block;
-	border: 2px solid black;
+	margin: 10 10 0 20;
+	padding-right: 30;
+}
+
+#misc_info{
+	vertical-align: middle;
+}
+
+#name{
+	font-size: 40;
+	display: inline-block;
+	margin:0;
+	padding-right: 10px;
+	font-family: Impact, Charcoal, sans-serif;
+}
+
+#logo{
+	width: 125px;
+	height: 125px;
+	vertical-align: middle;
+	display: inline-block;
+}
+
+#season_stats{
+	margin-top: -30;
+}
+
+.basic_stats{
+	vertical-align: top;
+	display: inline-block;
+	margin: 0 20 0 20;
+}
+
+.ss_header{
+	font-size: 20;
+	font-weight: bold;
+	text-decoration: underline;
+	margin-bottom: 5;
+}
+
+.stats{
+	margin-top: 0;
+	font-size: 25;
+}
+
+#other_info{
+	font-size: 10;
 }

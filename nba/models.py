@@ -45,6 +45,9 @@ class Player(models.Model):
 	position = models.CharField(max_length=3, default="")
 	college = models.CharField(max_length=200, default="")
 	draft = models.CharField(max_length=200, default="")
+	
+	url = models.CharField(max_length=400, default="")
+	image = models.ImageField(upload_to="static/player_pics", null=True)
 
 	points = models.CharField(max_length=10)
 	rebounds = models.CharField(max_length=10)
@@ -57,3 +60,13 @@ class Player(models.Model):
 		
 	def was_updated_recently(self):
 		return self.updated_at >= timezone.now() - datetime.timedelta(days=1)
+		
+	def cache(self):
+		if self.url and not self.image:
+			result = urllib.request.urlretrieve(self.url)
+			self.image.save(
+					os.path.basename(self.url),
+					File(open(result[0], 'rb'))
+					)
+			self.save()
+			

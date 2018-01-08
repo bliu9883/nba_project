@@ -1,10 +1,34 @@
 {% load static %}
 
 <link rel="stylesheet" type="text/css" href="{% static 'nba/player_info.css' %}" />
-
-<img src="{{player.team.logo.url}}">
-
-<div id="basic_info">
-	<h1> {{player.first_name}} {{player.last_name}}</h1>
-	<p> <a href="{% url 'nba:team_info' player.team.tri_code %}">{{player.team.team_name}}</a>, #{{player.jersey}}, {{player.position}} </p>
+<div id="pic">
+	<img id="player_pic" src="{{player.image.url}}" >
+</div>
+<div id="player_card">
+	<div id="basic_info">
+		<p id="name"> {{player.first_name}} {{player.last_name}}</p>
+		<p id="misc_info"> <a href="{% url 'nba:team_info' player.team.tri_code %}">{{player.team.team_name}}</a>, #{{player.jersey}}, {{player.position}} </p>
+		<p style="display: inline-block; padding-right: 20px;">	Height: {{player.height}} </p>
+		<p style="display: inline-block;"> Weight: {{player.weight}} lbs </p>
+	</div>
+	<img id="logo" src="{{player.team.logo.url}}">
+	<div id="season_stats">
+		<div class="basic_stats">
+			<p class="ss_header">Points</p>
+			<p class="stats">{{player.points}}</p>
+		</div>
+		<div class="basic_stats">
+			<p class="ss_header">Rebounds</p>
+			<p class="stats">{{player.rebounds}}</p>
+		</div>
+		<div class="basic_stats">
+			<p class="ss_header">Assists</p>
+			<p class="stats">{{player.assists}}</p>
+		</div>
+	</div>
+	<div id=other_info>
+		<p> Born: {{player.dob|slice:"5:7"}}/{{player.dob|slice:"8:10"}}/{{player.dob|slice:":4"}}</p>
+		<p> College: {{player.college}} </p>
+		<p> Draft: {{player.draft}} </p>
+	</div>
 </div>

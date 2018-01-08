@@ -47,9 +47,15 @@ def get_team_colors():
 
 def get_current_standings():
 	now = datetime.datetime.now()
-	date = str(now.year) + '%02d'%now.month + '%02d'%now.day
-	r = requests.get("http://data.nba.net/data/10s/prod/v1/" + date +"/standings_all.json")
-	r = r.json()['league']['standard']['teams']
+	r = ""
+	try:
+		date = str(now.year) + '%02d'%now.month + '%02d'%now.day
+		r = requests.get("http://data.nba.net/data/10s/prod/v1/" + date +"/standings_all.json")
+		r = r.json()['league']['standard']['teams']
+	except:
+		date = str(now.year) + '%02d'%now.month + '%02d'%(now.day-1)
+		r = requests.get("http://data.nba.net/data/10s/prod/v1/" + date +"/standings_all.json")
+		r = r.json()['league']['standard']['teams']
 	for i in r:
 		team = Team.objects.get(id=i['teamId'])
 		team.wins = i['win']
@@ -94,8 +100,10 @@ def get_players_on_team(teamId):
 									position=i['pos'],
 									college=i['collegeName'],
 									draft=i['draft']['seasonYear'] + " Round: " +i['draft']['roundNum'] + " Pick: " + i['draft']['pickNum'],
+									url="https://ak-static.cms.nba.com/wp-content/uploads/headshots/nba/latest/260x190/"+ i['personId'] +".png"
 									)
 					get_player_stats(player)
+					player.cache()
 					player.save()
 				else:
 					break;
@@ -105,15 +113,22 @@ def get_players_on_team(teamId):
 								first_name=i['firstName'],
 								last_name=i['lastName'],
 								jersey=i['jersey'],
-									height=i['heightFeet']+ "\'" + i['heightInches'] + '\"',
-									weight=i['weightPounds'] + "lbs",
-									dob=i['dateOfBirthUTC'],
-									position=i['pos'],
-									college=i['collegeName'],
-									draft=i['draft']['seasonYear'] + " Round: " +i['draft']['roundNum'] + " Pick: " + i['draft']['pickNum'],)
-				get_player_stats(player)
+								height=i['heightFeet']+ "\'" + i['heightInches'] + '\"',
+								weight=i['weightPounds'] + "lbs",
+								dob=i['dateOfBirthUTC'],
+								position=i['pos'],
+								college=i['collegeName'],
+								draft=i['draft']['seasonYear'] + " Round: " +i['draft']['roundNum'] + " Pick: " + i['draft']['pickNum'],
+								url="https://ak-static.cms.nba.com/wp-content/uploads/headshots/nba/latest/260x190/"+ i['personId'] +".png",)
+				get_player_stats(player) 
+				player.cache()
 				player.save()
-				
+
+def get_team_schedule(teamId):
+	r = requests.get("http://data.nba.net/data/10s/prod/v1/2017/teams/" + teamId + "/schedule.json")
+	r = r.json()['league']['standard']
+	for i in r:
+		print(i)
 
 # get team info using tricode as link
 def team_info(request, tri_code):
