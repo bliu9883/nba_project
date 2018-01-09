@@ -26,3 +26,13 @@
 	</tr>
 {% endfor %}
 </table>
+
+{% for game in schedule %}
+	{% if not game.isHomeTeam %}
+		<p>{{game.team}}: {{game.score}}</p>
+		<p>{{game.opponent}}: {{game.opponentScore}}</p>
+	{% else %}
+		<p>{{game.opponent}}: {{game.opponentScore}}</p>
+		<p>{{game.team}}: {{game.score}}</p>
+	{% endif %}
+{% endfor %}

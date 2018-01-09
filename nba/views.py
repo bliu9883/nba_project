@@ -1,8 +1,9 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import loader
-from .models import Team, Player
-import requests, datetime
+from .models import Team, Player, Schedule
+import requests, datetime, pytz
+from django.utils import timezone
 
 # Create your views here.
 def get_all_nba_teams():
@@ -124,21 +125,60 @@ def get_players_on_team(teamId):
 				player.cache()
 				player.save()
 
+	
+				
 def get_team_schedule(teamId):
-	r = requests.get("http://data.nba.net/data/10s/prod/v1/2017/teams/" + teamId + "/schedule.json")
+	r = requests.get("http://data.nba.net/data/10s/prod/v1/2017/teams/" + str(teamId) + "/schedule.json")
 	r = r.json()['league']['standard']
 	for i in r:
-		print(i)
+		dateUTC = i['startTimeUTC']
+		gameTime = datetime.datetime(int(dateUTC[:4]), int(dateUTC[5:7]), int(dateUTC[8:10]), int(dateUTC[11:13]), int(dateUTC[14:16]), int(dateUTC[17:19]), int(dateUTC[20:22]), pytz.UTC)
+		if Schedule.objects.filter(gameId=Team.objects.get(id=teamId).tri_code + "" + i['gameId']).exists():
+			s = Schedule.objects.get(gameId=Team.objects.get(id=teamId).tri_code + "" + i['gameId'])
+			if s.score and s.opponentScore:
+				continue
+			if i['statusNum']==3 and not s.score and not s.opponentScore:
+				s.score = int(i['hTeam']['score']) if s.isHomeTeam else int(i['vTeam']['score'])
+				s.opponentScore = int(i['vTeam']['score']) if s.isHomeTeam else int(i['vTeam']['score'])
+				s.save()
+		else:
+			if i['seasonStageId']==2:
+				isHomeTeam = i['isHomeTeam']
+				opponentTeamId = int(i['hTeam']['teamId']) if not isHomeTeam else int(i['vTeam']['teamId'])
+				score = None
+				opponentScore=None
+				if i['statusNum']==3:
+					score = int(i['hTeam']['score']) if isHomeTeam else int(i['vTeam']['score'])
+					opponentScore = int(i['hTeam']['score']) if not isHomeTeam else int(i['vTeam']['score'])
+					game = Schedule(gameId=Team.objects.get(id=teamId).tri_code + "" + i['gameId'],
+									date=gameTime,
+									team=Team.objects.get(id=teamId),
+									opponent=Team.objects.get(id=opponentTeamId),
+									isHomeTeam=isHomeTeam,
+									score=score,
+									opponentScore=opponentScore)
+					game.save()
+				else:
+					game = Schedule(gameId=Team.objects.get(id=teamId).tri_code + "" + i['gameId'],
+									date=gameTime,
+									team=Team.objects.get(id=teamId),
+									opponent=Team.objects.get(id=opponentTeamId),
+									isHomeTeam=isHomeTeam)
+					game.save()
+		
 
 # get team info using tricode as link
 def team_info(request, tri_code):
 	team = Team.objects.get(tri_code=tri_code)
 	get_players_on_team(team.id)
+	get_team_schedule(team.id)
 	players = team.player_set.all().order_by('last_name')
+	schedule = team.team.filter(date__lt=timezone.now()).order_by('-date')[:5][::-1]
 	template = loader.get_template('nba/team_roster.html')
 	context = {
 		'team': team,
 		'players': players,
+		'schedule': schedule,
 	}
 	return HttpResponse(template.render(context, request))
 

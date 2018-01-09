@@ -62,11 +62,29 @@ class Player(models.Model):
 		return self.updated_at >= timezone.now() - datetime.timedelta(days=1)
 		
 	def cache(self):
-		if self.url and not self.image:
-			result = urllib.request.urlretrieve(self.url)
-			self.image.save(
-					os.path.basename(self.url),
-					File(open(result[0], 'rb'))
-					)
-			self.save()
+		try:
+			if self.url and not self.image:
+				result = urllib.request.urlretrieve(self.url)
+				self.image.save(
+						os.path.basename(self.url),
+						File(open(result[0], 'rb'))
+						)
+				self.save()
+		except:
+			pass
 			
+class Schedule(models.Model):
+	gameId = models.CharField(default="", max_length=50, unique=True)
+	team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="team")
+	opponent = models.ForeignKey(Team, on_delete=models.CASCADE, related_name="opponent")
+	date = models.DateTimeField()
+	isHomeTeam = models.BooleanField()
+	score = models.IntegerField(null=True)
+	opponentScore = models.IntegerField(null=True)
+	
+	def __str__(self):
+		if self.isHomeTeam:
+			return self.opponent.team_name + " @ " + self.team.team_name
+		else:
+			return self.team.team_name + " @ " + self.opponent.team_name
+	
